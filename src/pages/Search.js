@@ -4,11 +4,13 @@ import fetch from 'isomorphic-unfetch';
 
 import { Input, Button } from '../components/FormComponents';
 import Spinner from '../components/Spinner';
+import ErrorContainer from '../components/ErrorContainer';
 
 function Search({ query }) {
   const [ inputQuery, setInputQuery ] = useState(query || "");
   const [ repos, setRepos ] = useState([]);
   const [ loading, setLoading ] = useState(false);
+  const [ error, setError ] = useState(false);
   const history = useHistory();
 
   useEffect(() => {
@@ -29,11 +31,13 @@ function Search({ query }) {
           if (e instanceof DOMException) {
             console.log("== HTTP request aborted");
           } else {
-            throw e;
+            setError(true);
+            console.log(e);
           }
         }
 
         if (!ignore) {
+          setError(false);
           setLoading(false);
           setRepos(responseBody.items);
         } else {
@@ -62,6 +66,7 @@ function Search({ query }) {
         />
         <Button type="submit">Search</Button>
       </form>
+      {error && <ErrorContainer>Error!</ErrorContainer>}
       {loading ? (
         <Spinner />
       ) :
