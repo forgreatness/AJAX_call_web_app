@@ -1,77 +1,108 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import fetch from 'isomorphic-unfetch';
 
 import { Input, Button } from '../components/FormComponents';
 import Spinner from '../components/Spinner';
 import ErrorContainer from '../components/ErrorContainer';
 
-function Search({ query }) {
-  const [ inputQuery, setInputQuery ] = useState(query || "");
-  const [ repos, setRepos ] = useState([]);
-  const [ loading, setLoading ] = useState(false);
-  const [ error, setError ] = useState(false);
+// function Search({ query }) {
+//   const [ inputQuery, setInputQuery ] = useState(query || "");
+//   const [ repos, setRepos ] = useState([]);
+//   const [ loading, setLoading ] = useState(false);
+//   const [ error, setError ] = useState(false);
+//   const history = useHistory();
+
+//   useEffect(() => {
+//     if (query) {
+//       let ignore = false;
+//       const controller = new AbortController();
+
+//       async function fetchSearchResults() {
+//         let responseBody = {};
+//         setLoading(true);
+//         try {
+//           const response = await fetch(
+//             `https://api.github.com/search/repositories?q=${query}&sort=stars`,
+//             { signal: controller.signal }
+//           );
+//           responseBody = await response.json();
+//         } catch (e) {
+//           if (e instanceof DOMException) {
+//             console.log("== HTTP request aborted");
+//           } else {
+//             setError(true);
+//             console.log(e);
+//           }
+//         }
+
+//         if (!ignore) {
+//           setError(false);
+//           setLoading(false);
+//           setRepos(responseBody.items);
+//         } else {
+//           console.log("== ignoring results");
+//         }
+//         // console.log("== response body:", responseBody);
+//       }
+
+//       fetchSearchResults();
+//       return () => {
+//         controller.abort();
+//         ignore = true;
+//       };
+//     }
+//   }, [ query ]);
+
+//   return (
+//     <div>
+//       <form onSubmit={(e) => {
+//         e.preventDefault();
+//         history.push(`?q=${inputQuery}`);
+//       }}>
+//         <Input
+//           value={inputQuery}
+//           onChange={e => setInputQuery(e.target.value)}
+//         />
+//         <Button type="submit">Search</Button>
+//       </form>
+//       {error && <ErrorContainer>Error!</ErrorContainer>}
+//       {loading ? (
+//         <Spinner />
+//       ) :
+//         <ul>
+//           {repos.map(repo => (
+//             <li key={repo.id}>
+//               <a href={repo.html_url}>{repo.full_name}</a>
+//             </li>
+//           ))}
+//         </ul>
+//       }
+//     </div>
+//   );
+// }
+
+
+function Search(props) {
   const history = useHistory();
-
-  useEffect(() => {
-    if (query) {
-      let ignore = false;
-      const controller = new AbortController();
-
-      async function fetchSearchResults() {
-        let responseBody = {};
-        setLoading(true);
-        try {
-          const response = await fetch(
-            `https://api.github.com/search/repositories?q=${query}&sort=stars`,
-            { signal: controller.signal }
-          );
-          responseBody = await response.json();
-        } catch (e) {
-          if (e instanceof DOMException) {
-            console.log("== HTTP request aborted");
-          } else {
-            setError(true);
-            console.log(e);
-          }
-        }
-
-        if (!ignore) {
-          setError(false);
-          setLoading(false);
-          setRepos(responseBody.items);
-        } else {
-          console.log("== ignoring results");
-        }
-        // console.log("== response body:", responseBody);
-      }
-
-      fetchSearchResults();
-      return () => {
-        controller.abort();
-        ignore = true;
-      };
-    }
-  }, [ query ]);
 
   return (
     <div>
       <form onSubmit={(e) => {
-        e.preventDefault();
-        history.push(`?q=${inputQuery}`);
+        history.push(`?q=${props.searchQuery}`);
+        props.submitSearchQuery(e);
       }}>
         <Input
-          value={inputQuery}
-          onChange={e => setInputQuery(e.target.value)}
+          value={props.searchQuery}
+          onChange={props.changeSearchQuery}
         />
         <Button type="submit">Search</Button>
       </form>
-      {error && <ErrorContainer>Error!</ErrorContainer>}
-      {loading ? (
+      {props.error && <ErrorContainer>Error!</ErrorContainer>}
+      {props.loading ? (
         <Spinner />
       ) :
         <ul>
-          {repos.map(repo => (
+          {props.repos.map(repo => (
             <li key={repo.id}>
               <a href={repo.html_url}>{repo.full_name}</a>
             </li>
